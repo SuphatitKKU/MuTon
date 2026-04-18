@@ -685,6 +685,7 @@
         </section>
         <div id="day-detail"></div>
         <div id="month-summary"></div>
+        <div id="goal-prediction"></div>
       </div>
     `;
 
@@ -703,6 +704,50 @@
 
     renderCalendarGrid();
     renderMonthSummary();
+    renderGoalPrediction();
+  }
+
+  function renderGoalPrediction() {
+    const container = document.getElementById('goal-prediction');
+    if (!container) return;
+    
+    const p = state.profile;
+    if (!p || !p.weight || !p.targetWeight || p.weight <= p.targetWeight) {
+      container.innerHTML = '';
+      return;
+    }
+    
+    const bmr = calculateBMR(p.weight, p.height, p.age, p.gender);
+    const tdee = calculateTDEE(bmr, p.activityLevel);
+    const dailyDeficit = tdee - p.dailyGoal;
+    
+    if (dailyDeficit <= 0) {
+      container.innerHTML = '';
+      return;
+    }
+    
+    const totalDeficitNeeded = (p.weight - p.targetWeight) * 7700;
+    const daysNeeded = Math.ceil(totalDeficitNeeded / dailyDeficit);
+    
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() + daysNeeded);
+    
+    const targetDateStr = `${targetDate.getDate()} ${THAI_MONTHS[targetDate.getMonth()]} ${targetDate.getFullYear() + 543}`;
+    
+    container.innerHTML = `
+      <section class="bg-primary-container/20 rounded-3xl p-5 border border-primary/20 mt-1 flex items-start gap-4">
+        <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-primary">
+          <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+        </div>
+        <div>
+          <h3 class="font-headline text-sm font-bold text-primary">คาดว่าจะสำเร็จในวันที่</h3>
+          <p class="font-headline text-xl font-bold text-on-surface mt-0.5">${targetDateStr}</p>
+          <p class="font-body text-[11px] text-on-surface-variant mt-1.5 leading-relaxed opacity-80">
+            *คำนวณจากการเผาผลาญ ${formatNumber(tdee)} แคล/วัน และกินตามเป้า ${formatNumber(p.dailyGoal)} แคล/วัน
+          </p>
+        </div>
+      </section>
+    `;
   }
 
   function renderCalendarGrid() {
