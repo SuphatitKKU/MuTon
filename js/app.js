@@ -414,9 +414,9 @@
         <div class="w-5 h-5 border-2 border-on-surface-variant/30 border-t-primary rounded-full animate-spin"></div>
         กำลังเข้าสู่ระบบ...
       `;
-      
+
       await signInPromise;
-      
+
       // If sign in fails, restore button
       if (!state.user) {
         btn.disabled = false;
@@ -590,7 +590,7 @@
     state.mealName = '';
 
     container.innerHTML = `
-      <div class="page-slide-up flex flex-col min-h-[calc(100dvh-0px)] -mx-4 px-4" style="padding-top: env(safe-area-inset-top, 12px);">
+      <div class="page-slide-up flex flex-col min-h-[calc(50dvh-0px)] -mx-4 px-4" style="padding-top: env(safe-area-inset-top, 12px);">
         <div class="flex justify-between items-center py-3 mb-2">
           <button id="btn-close-add" class="p-2 -ml-2 rounded-full hover:bg-surface-container transition-colors text-primary">
             <span class="material-symbols-outlined text-2xl">close</span>
