@@ -353,7 +353,7 @@
   // ======================
   function renderLogin(container) {
     container.innerHTML = `
-      <div class="page-enter flex flex-col items-center justify-center min-h-[40vh] gap-8 px-6 text-center pt-8">
+      <div class="page-enter flex flex-col items-center justify-center min-h-[30vh] gap-8 px-6 text-center pt-8">
         <!-- Logo Section -->
         <div class="flex flex-col items-center gap-3">
           <div class="w-24 h-24 rounded-3xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
