@@ -179,7 +179,7 @@
             state.todayTotal = data.totalCalories || 0;
             if (state.currentPage === 'home') updateHomeData();
           }
-        }, () => {});
+        }, () => { });
     } catch (e) { console.warn('Firebase subscription failed:', e.message); }
   }
 
@@ -266,20 +266,13 @@
   // ======================
   // AUTH: GOOGLE LOGIN
   // ======================
-  async function signInWithGoogle() {
+  function signInWithGoogle() {
     try {
-      const result = await auth.signInWithPopup(googleProvider);
-      return result.user;
+      // Use redirect (works on iOS, Android, desktop, PWA standalone)
+      auth.signInWithRedirect(googleProvider);
     } catch (e) {
       console.error('Google Sign-In error:', e);
-      if (e.code === 'auth/popup-closed-by-user') {
-        showToast('ยกเลิกการเข้าสู่ระบบ');
-      } else if (e.code === 'auth/popup-blocked') {
-        showToast('เบราว์เซอร์บล็อก popup กรุณาอนุญาต');
-      } else {
-        showToast('เข้าสู่ระบบไม่สำเร็จ: ' + (e.message || 'ลองใหม่'));
-      }
-      return null;
+      showToast('เข้าสู่ระบบไม่สำเร็จ: ' + (e.message || 'ลองใหม่'));
     }
   }
 
@@ -360,7 +353,7 @@
   // ======================
   function renderLogin(container) {
     container.innerHTML = `
-      <div class="page-enter flex flex-col items-center justify-center min-h-[80vh] gap-8 px-6 text-center -mt-20">
+      <div class="page-enter flex flex-col items-center justify-center min-h-[40vh] gap-8 px-6 text-center pt-8">
         <!-- Logo Section -->
         <div class="flex flex-col items-center gap-3">
           <div class="w-24 h-24 rounded-3xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
@@ -403,24 +396,14 @@
       </div>
     `;
 
-    document.getElementById('btn-google-signin').addEventListener('click', async () => {
+    document.getElementById('btn-google-signin').addEventListener('click', () => {
       const btn = document.getElementById('btn-google-signin');
       btn.disabled = true;
       btn.innerHTML = `
         <div class="w-5 h-5 border-2 border-on-surface-variant/30 border-t-primary rounded-full animate-spin"></div>
         กำลังเข้าสู่ระบบ...
       `;
-      await signInWithGoogle();
-      btn.disabled = false;
-      btn.innerHTML = `
-        <svg width="20" height="20" viewBox="0 0 48 48">
-          <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
-          <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"/>
-          <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0124 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>
-          <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 01-4.087 5.571l.003-.002l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
-        </svg>
-        เข้าสู่ระบบด้วย Google
-      `;
+      signInWithGoogle();
     });
   }
 
@@ -607,7 +590,7 @@
         </div>
         <div class="flex-grow"></div>
         <div class="grid grid-cols-3 gap-2.5 mb-4 px-1">
-          ${[1,2,3,4,5,6,7,8,9].map(n => `<button class="numpad-btn h-14 rounded-2xl bg-surface-container-low text-on-surface font-headline text-xl font-medium" data-num="${n}">${n}</button>`).join('')}
+          ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button class="numpad-btn h-14 rounded-2xl bg-surface-container-low text-on-surface font-headline text-xl font-medium" data-num="${n}">${n}</button>`).join('')}
           <div></div>
           <button class="numpad-btn h-14 rounded-2xl bg-surface-container-low text-on-surface font-headline text-xl font-medium" data-num="0">0</button>
           <button class="numpad-btn h-14 rounded-2xl bg-surface-container-low text-on-surface-variant flex items-center justify-center" data-action="backspace">
@@ -978,6 +961,14 @@
   // ======================
   function init() {
     state.firebaseReady = isFirebaseConfigured();
+
+    // Handle redirect result (returning from Google login on iOS/mobile)
+    auth.getRedirectResult().catch((e) => {
+      console.warn('Redirect result error:', e.message);
+      if (e.code !== 'auth/credential-already-in-use') {
+        showToast('เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่');
+      }
+    });
 
     // Listen for auth state changes
     auth.onAuthStateChanged(async (user) => {
