@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add Entry - Vitality</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;900&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#fff0e3",
+                        "tertiary-fixed": "#f8a010",
+                        "surface-dim": "#d0d5d8",
+                        "on-tertiary-fixed": "#2a1700",
+                        "outline-variant": "#abadaf",
+                        "on-tertiary-container": "#4a2c00",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#570008",
+                        "primary-fixed-dim": "#58e7ab",
+                        "on-secondary": "#edf3ff",
+                        "on-surface": "#2c2f31",
+                        "inverse-surface": "#0b0f10",
+                        "on-background": "#2c2f31",
+                        "secondary-fixed": "#c8d8f3",
+                        "tertiary-container": "#f8a010",
+                        "background": "#f5f7f9",
+                        "primary-dim": "#005c3d",
+                        "surface-bright": "#f5f7f9",
+                        "primary-container": "#69f6b8",
+                        "inverse-primary": "#69f6b8",
+                        "secondary-fixed-dim": "#bacae4",
+                        "surface-tint": "#006947",
+                        "surface-container-highest": "#d9dde0",
+                        "on-primary-fixed": "#00452d",
+                        "secondary": "#4d5d73",
+                        "on-primary": "#c8ffe0",
+                        "surface-container-low": "#eef1f3",
+                        "outline": "#747779",
+                        "secondary-container": "#c8d8f3",
+                        "on-secondary-fixed": "#29394e",
+                        "error-dim": "#9f0519",
+                        "on-error": "#ffefee",
+                        "on-surface-variant": "#595c5e",
+                        "primary": "#006947",
+                        "error": "#b31b25",
+                        "tertiary-dim": "#714600",
+                        "error-container": "#fb5151",
+                        "surface-variant": "#d9dde0",
+                        "primary-fixed": "#69f6b8",
+                        "surface": "#f5f7f9",
+                        "on-primary-fixed-variant": "#006544",
+                        "on-primary-container": "#005a3c",
+                        "tertiary-fixed-dim": "#e79400",
+                        "on-secondary-fixed-variant": "#46556b",
+                        "tertiary": "#815100",
+                        "inverse-on-surface": "#9a9d9f",
+                        "secondary-dim": "#415166",
+                        "on-tertiary-fixed-variant": "#563400",
+                        "surface-container": "#e5e9eb",
+                        "surface-container-high": "#dfe3e6",
+                        "on-secondary-container": "#3c4c61"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Lexend"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        h1, h2, h3, h4, h5, h6, .font-headline { font-family: 'Lexend', sans-serif; }
+        .tap-highlight-transparent { -webkit-tap-highlight-color: transparent; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl flex justify-between items-center px-6 py-4 w-full max-w-7xl mx-auto shadow-sm">
+<div class="flex items-center gap-4">
+<button aria-label="Go back" class="p-2 -ml-2 rounded-full hover:bg-surface-container transition-colors text-primary">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<div class="font-['Lexend'] font-black text-emerald-900 dark:text-emerald-100 text-2xl">
+            Vitality
+        </div>
+<div class="flex items-center">
+<button aria-label="Settings" class="p-2 -mr-2 rounded-full hover:bg-surface-container transition-colors text-primary">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-24 pb-8 px-6 max-w-md mx-auto w-full flex flex-col">
+<!-- Header Section -->
+<div class="mb-8 mt-4 text-center">
+<h1 class="font-headline text-3xl font-bold text-on-surface mb-2 tracking-tight">Add Entry</h1>
+<p class="text-on-surface-variant text-sm font-body">What did you have?</p>
+</div>
+<!-- Input Form -->
+<div class="flex flex-col gap-6 flex-grow">
+<!-- Food Name Input -->
+<div class="flex flex-col gap-2">
+<label class="font-label text-sm font-semibold text-on-surface ml-1" for="food-name">Meal Name</label>
+<div class="relative group">
+<input class="w-full bg-surface-container text-on-surface placeholder:text-on-surface-variant rounded-xl border-none focus:ring-0 focus:bg-surface-container-high transition-colors py-4 px-5 font-body text-lg h-16 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]" id="food-name" placeholder="e.g. Avocado Toast" type="text"/>
+</div>
+</div>
+<!-- Calorie Display / Input Area -->
+<div class="flex flex-col gap-2 mt-4 items-center">
+<label class="font-label text-sm font-semibold text-on-surface-variant">Calories</label>
+<div class="flex items-baseline justify-center gap-2 mb-2">
+<span class="font-headline text-6xl font-bold text-primary tracking-tighter" id="cal-display">0</span>
+<span class="font-body text-lg text-on-surface-variant font-medium">kcal</span>
+</div>
+<!-- Subtle Indicator Line -->
+<div class="w-24 h-1 bg-surface-container-high rounded-full"></div>
+</div>
+<!-- Spacer -->
+<div class="flex-grow"></div>
+<!-- Numeric Keypad -->
+<div class="grid grid-cols-3 gap-3 mb-8 px-2">
+<!-- Row 1 -->
+<button class="h-16 rounded-xl bg-surface-container-low text-on-surface font-headline text-2xl font-medium hover:bg-surface-container active:bg-surface-container-high transition-colors tap-highlight-transparent">1</button>
+<button class="h-16 rounded-xl bg-surface-container-low text-on-surface font-headline text-2xl font-medium hover:bg-surface-container active:bg-surface-container-high transition-colors tap-highlight-transparent">2</button>
+<button class="h-16 rounded-xl bg-surface-container-low text-on-surface font-headline text-2xl font-medium hover:bg-surface-container active:bg-surface-container-high transition-colors tap-highlight-transparent">3</button>
+<!-- Row 2 -->
+<button class="h-16 rounded-xl bg-surface-container-low text-on-surface font-headline text-2xl font-medium hover:bg-surface-container active:bg-surface-container-high transition-colors tap-highlight-transparent">4</button>
+<button class="h-16 rounded-xl bg-surface-container-low text-on-surface font-headline text-2xl font-medium hover:bg-surface-container active:bg-surface-container-high transition-colors tap-highlight-transparent">5</button>
+<button class="h-16 rounded-xl bg-surface-container-low text-on-surface font-headline text-2xl font-medium hover:bg-surface-container active:bg-surface-container-high transition-colors tap-highlight-transparent">6</button>
+<!-- Row 3 -->
+<button class="h-16 rounded-xl bg-surface-container-low text-on-surface font-headline text-2xl font-medium hover:bg-surface-container active:bg-surface-container-high transition-colors tap-highlight-transparent">7</button>
+<button class="h-16 rounded-xl bg-surface-container-low text-on-surface font-headline text-2xl font-medium hover:bg-surface-container active:bg-surface-container-high transition-colors tap-highlight-transparent">8</button>
+<button class="h-16 rounded-xl bg-surface-container-low text-on-surface font-headline text-2xl font-medium hover:bg-surface-container active:bg-surface-container-high transition-colors tap-highlight-transparent">9</button>
+<!-- Row 4 -->
+<div></div>
+<button class="h-16 rounded-xl bg-surface-container-low text-on-surface font-headline text-2xl font-medium hover:bg-surface-container active:bg-surface-container-high transition-colors tap-highlight-transparent">0</button>
+<button class="h-16 rounded-xl bg-surface-container-low text-on-surface-variant font-headline flex items-center justify-center hover:bg-surface-container active:bg-surface-container-high transition-colors tap-highlight-transparent">
+<span class="material-symbols-outlined text-2xl" data-icon="backspace">backspace</span>
+</button>
+</div>
+<!-- Submit Button -->
+<button class="w-full bg-primary text-on-primary font-headline font-semibold text-lg py-5 rounded-full hover:opacity-90 active:scale-[0.98] transition-all shadow-[0_20px_40px_rgba(0,105,71,0.15)] flex justify-center items-center gap-2 tap-highlight-transparent">
+<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
+                Add to Diary
+            </button>
+</div>
+</main>
+</body></html>

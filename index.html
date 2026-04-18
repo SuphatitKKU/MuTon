@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>MuTon - นับแคลอรี่</title>
+  <meta name="description" content="แอปนับแคลอรี่สำหรับควบคุมน้ำหนัก ติดตามมื้ออาหารและดูปฏิทินความสำเร็จ">
+  <meta name="theme-color" content="#006947">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet">
+
+  <!-- Tailwind Config (Vitality Design System) -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "on-tertiary": "#fff0e3",
+            "tertiary-fixed": "#f8a010",
+            "surface-dim": "#d0d5d8",
+            "on-tertiary-fixed": "#2a1700",
+            "outline-variant": "#abadaf",
+            "on-tertiary-container": "#4a2c00",
+            "surface-container-lowest": "#ffffff",
+            "on-error-container": "#570008",
+            "primary-fixed-dim": "#58e7ab",
+            "on-secondary": "#edf3ff",
+            "on-surface": "#2c2f31",
+            "inverse-surface": "#0b0f10",
+            "on-background": "#2c2f31",
+            "secondary-fixed": "#c8d8f3",
+            "tertiary-container": "#f8a010",
+            "background": "#f5f7f9",
+            "primary-dim": "#005c3d",
+            "surface-bright": "#f5f7f9",
+            "primary-container": "#69f6b8",
+            "inverse-primary": "#69f6b8",
+            "secondary-fixed-dim": "#bacae4",
+            "surface-tint": "#006947",
+            "surface-container-highest": "#d9dde0",
+            "on-primary-fixed": "#00452d",
+            "secondary": "#4d5d73",
+            "on-primary": "#c8ffe0",
+            "surface-container-low": "#eef1f3",
+            "outline": "#747779",
+            "secondary-container": "#c8d8f3",
+            "on-secondary-fixed": "#29394e",
+            "error-dim": "#9f0519",
+            "on-error": "#ffefee",
+            "on-surface-variant": "#595c5e",
+            "primary": "#006947",
+            "error": "#b31b25",
+            "tertiary-dim": "#714600",
+            "error-container": "#fb5151",
+            "surface-variant": "#d9dde0",
+            "primary-fixed": "#69f6b8",
+            "surface": "#f5f7f9",
+            "on-primary-fixed-variant": "#006544",
+            "on-primary-container": "#005a3c",
+            "tertiary-fixed-dim": "#e79400",
+            "on-secondary-fixed-variant": "#46556b",
+            "tertiary": "#815100",
+            "inverse-on-surface": "#9a9d9f",
+            "secondary-dim": "#415166",
+            "on-tertiary-fixed-variant": "#563400",
+            "surface-container": "#e5e9eb",
+            "surface-container-high": "#dfe3e6",
+            "on-secondary-container": "#3c4c61"
+          },
+          borderRadius: {
+            DEFAULT: "0.25rem",
+            lg: "0.5rem",
+            xl: "0.75rem",
+            "2xl": "1rem",
+            "3xl": "1.5rem",
+            full: "9999px"
+          },
+          fontFamily: {
+            headline: ["Prompt", "sans-serif"],
+            body: ["Prompt", "sans-serif"],
+            label: ["Prompt", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+</head>
+
+<body class="bg-surface text-on-surface min-h-screen antialiased">
+
+  <!-- Loading Splash Screen -->
+  <div id="splash-screen" class="fixed inset-0 z-[999] bg-surface flex flex-col items-center justify-center gap-4">
+    <div class="w-20 h-20 rounded-3xl bg-primary flex items-center justify-center shadow-lg">
+      <span class="material-symbols-outlined text-on-primary text-4xl"
+        style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+    </div>
+    <h1 class="font-headline text-3xl font-black text-primary tracking-tight">MuTon</h1>
+    <p class="font-body text-on-surface-variant text-sm">นับแคลอรี่ ควบคุมน้ำหนัก</p>
+    <div class="w-8 h-8 border-3 border-primary-container border-t-primary rounded-full animate-spin mt-4"></div>
+  </div>
+
+  <!-- Top App Bar -->
+  <header id="top-bar" class="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl">
+    <div class="flex justify-between items-center px-5 py-3 max-w-lg mx-auto"
+      style="padding-top: env(safe-area-inset-top, 12px);">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
+          <span class="material-symbols-outlined text-on-primary text-lg"
+            style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+        </div>
+        <span class="font-headline font-black text-primary text-xl tracking-tight">MuTon</span>
+      </div>
+      <button id="btn-top-settings"
+        class="p-2 rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant">
+        <span class="material-symbols-outlined text-xl">settings</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main id="app-content" class="max-w-lg mx-auto px-4 pt-20 pb-24 min-h-screen">
+    <!-- Dynamic page content rendered here by JS -->
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav id="bottom-nav"
+    class="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-t border-outline-variant/10">
+    <div class="flex justify-around items-center max-w-lg mx-auto py-2 px-4">
+      <button class="nav-item active flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-2xl" data-page="home">
+        <span class="material-symbols-outlined text-[22px]">home</span>
+        <span class="text-[11px] font-medium font-label">หน้าหลัก</span>
+      </button>
+      <button class="nav-item flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-2xl text-on-surface-variant"
+        data-page="calendar">
+        <span class="material-symbols-outlined text-[22px]">calendar_month</span>
+        <span class="text-[11px] font-medium font-label">ปฏิทิน</span>
+      </button>
+      <button class="nav-item flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-2xl text-on-surface-variant"
+        data-page="settings">
+        <span class="material-symbols-outlined text-[22px]">person</span>
+        <span class="text-[11px] font-medium font-label">โปรไฟล์</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Scripts -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>

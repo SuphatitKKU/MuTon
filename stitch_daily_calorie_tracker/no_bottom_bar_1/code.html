@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vitality - Daily Summary</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;900&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary": "#fff0e3",
+                    "tertiary-fixed": "#f8a010",
+                    "surface-dim": "#d0d5d8",
+                    "on-tertiary-fixed": "#2a1700",
+                    "outline-variant": "#abadaf",
+                    "on-tertiary-container": "#4a2c00",
+                    "surface-container-lowest": "#ffffff",
+                    "on-error-container": "#570008",
+                    "primary-fixed-dim": "#58e7ab",
+                    "on-secondary": "#edf3ff",
+                    "on-surface": "#2c2f31",
+                    "inverse-surface": "#0b0f10",
+                    "on-background": "#2c2f31",
+                    "secondary-fixed": "#c8d8f3",
+                    "tertiary-container": "#f8a010",
+                    "background": "#f5f7f9",
+                    "primary-dim": "#005c3d",
+                    "surface-bright": "#f5f7f9",
+                    "primary-container": "#69f6b8",
+                    "inverse-primary": "#69f6b8",
+                    "secondary-fixed-dim": "#bacae4",
+                    "surface-tint": "#006947",
+                    "surface-container-highest": "#d9dde0",
+                    "on-primary-fixed": "#00452d",
+                    "secondary": "#4d5d73",
+                    "on-primary": "#c8ffe0",
+                    "surface-container-low": "#eef1f3",
+                    "outline": "#747779",
+                    "secondary-container": "#c8d8f3",
+                    "on-secondary-fixed": "#29394e",
+                    "error-dim": "#9f0519",
+                    "on-error": "#ffefee",
+                    "on-surface-variant": "#595c5e",
+                    "primary": "#006947",
+                    "error": "#b31b25",
+                    "tertiary-dim": "#714600",
+                    "error-container": "#fb5151",
+                    "surface-variant": "#d9dde0",
+                    "primary-fixed": "#69f6b8",
+                    "surface": "#f5f7f9",
+                    "on-primary-fixed-variant": "#006544",
+                    "on-primary-container": "#005a3c",
+                    "tertiary-fixed-dim": "#e79400",
+                    "on-secondary-fixed-variant": "#46556b",
+                    "tertiary": "#815100",
+                    "inverse-on-surface": "#9a9d9f",
+                    "secondary-dim": "#415166",
+                    "on-tertiary-fixed-variant": "#563400",
+                    "surface-container": "#e5e9eb",
+                    "surface-container-high": "#dfe3e6",
+                    "on-secondary-container": "#3c4c61"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {},
+            "fontFamily": {
+                    "headline": [
+                            "Lexend"
+                    ],
+                    "body": [
+                            "Plus Jakarta Sans"
+                    ],
+                    "label": [
+                            "Plus Jakarta Sans"
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        h1, h2, h3, h4, h5, h6, .font-headline { font-family: 'Lexend', sans-serif; }
+        
+        .circle-progress {
+            transform: rotate(-90deg);
+        }
+        .circle-progress-bg {
+            stroke: theme('colors.primary-container');
+        }
+        .circle-progress-fill {
+            stroke: theme('colors.primary');
+            stroke-dasharray: 628; /* 2 * PI * R where R=100 */
+            stroke-dashoffset: 220; /* Example progress */
+            stroke-linecap: round;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen antialiased pb-8 md:pb-0 pt-20">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl">
+<div class="flex justify-between items-center px-6 py-4 w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-4">
+<img alt="User Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-surface-container-low" data-alt="A portrait of a healthy individual with a soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdhRfmp0KpR_afMC_l2VXv0E-roLWV8Y70d9o_k1i9FlbEtghIp9dALVjU4dpZraoZAy2930ojei4of-0y7EKU4PGaka7rw6sIB4Q2etBzdXmy2Hc5RTZzvCnTwpdrLKWtWw8rPar3bRJkH4BZ97mO3CetnLrEb0CEzFUUwBQ3DdyvAAwRwLWU_jdz0JSuaTVTpVg4qkFP_H9Tq7jv62VT53-uH8TXIAbufjZB_blThY2l6unqNhhMomP5W9oh6HhugINtQmcg84g"/>
+<span class="font-['Lexend'] font-black text-emerald-900 dark:text-emerald-100 text-2xl">Vitality</span>
+</div>
+<button class="scale-95 active:transition-all hover:opacity-80 transition-opacity text-emerald-800 dark:text-emerald-400 p-2 rounded-full hover:bg-surface-container-low">
+<span class="material-symbols-outlined text-2xl">settings</span>
+</button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="max-w-3xl mx-auto px-4 md:px-6 pt-6 flex flex-col gap-8">
+<!-- Header Section -->
+<section class="flex justify-between items-end mb-2">
+<div>
+<h1 class="font-headline text-4xl text-primary font-bold tracking-tight">Today</h1>
+<p class="font-body text-on-surface-variant text-lg mt-1">Thursday, Oct 12</p>
+</div>
+<div class="bg-surface-container-lowest px-4 py-2 rounded-full border border-outline-variant/15 flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-sm" data-weight="fill" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="font-label font-semibold text-tertiary">3 Day Streak</span>
+</div>
+</section>
+<!-- Progress Hero Card (Organic Brutalism style) -->
+<section class="bg-surface-container-lowest rounded-xl p-8 relative overflow-hidden flex flex-col md:flex-row items-center gap-8 shadow-[0_20px_40px_rgba(44,47,49,0.06)] border border-outline-variant/15">
+<!-- Decorative gradient bg behind circle -->
+<div class="absolute -top-10 -left-10 w-48 h-48 bg-primary-container/30 rounded-full blur-3xl pointer-events-none"></div>
+<!-- Circular Chart -->
+<div class="relative w-48 h-48 flex-shrink-0 flex items-center justify-center">
+<svg class="w-full h-full circle-progress absolute top-0 left-0" viewbox="0 0 220 220">
+<circle class="circle-progress-bg opacity-30" cx="110" cy="110" fill="none" r="100" stroke-width="16"></circle>
+<circle class="circle-progress-fill drop-shadow-sm" cx="110" cy="110" fill="none" r="100" stroke-width="16"></circle>
+</svg>
+<div class="text-center z-10 flex flex-col items-center">
+<span class="font-headline text-5xl font-bold text-on-surface tracking-tighter">1,240</span>
+<span class="font-label text-sm text-on-surface-variant font-medium mt-1">kcal left</span>
+</div>
+</div>
+<!-- Stats Column -->
+<div class="flex-grow w-full flex flex-col gap-6 relative z-10 pl-0 md:pl-8 md:border-l md:border-outline-variant/15">
+<div class="flex justify-between items-baseline">
+<div class="flex flex-col">
+<span class="font-label text-sm text-on-surface-variant">Consumed</span>
+<span class="font-headline text-2xl font-semibold text-primary">860 <span class="text-sm font-normal text-on-surface-variant">kcal</span></span>
+</div>
+<div class="text-right flex flex-col">
+<span class="font-label text-sm text-on-surface-variant">Goal</span>
+<span class="font-headline text-xl font-medium text-on-surface">2,100</span>
+</div>
+</div>
+<!-- Macros Bento Row -->
+<div class="grid grid-cols-3 gap-3">
+<div class="bg-surface-container rounded-lg p-3 flex flex-col">
+<span class="font-label text-xs text-on-surface-variant mb-1 flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-[#E57373]"></span> Protein
+                        </span>
+<span class="font-body font-semibold text-lg text-on-surface">42<span class="text-xs font-normal ml-1">g</span></span>
+<div class="w-full bg-surface h-1.5 rounded-full mt-2 overflow-hidden">
+<div class="bg-[#E57373] h-full rounded-full" style="width: 40%;"></div>
+</div>
+</div>
+<div class="bg-surface-container rounded-lg p-3 flex flex-col">
+<span class="font-label text-xs text-on-surface-variant mb-1 flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-[#81C784]"></span> Carbs
+                        </span>
+<span class="font-body font-semibold text-lg text-on-surface">110<span class="text-xs font-normal ml-1">g</span></span>
+<div class="w-full bg-surface h-1.5 rounded-full mt-2 overflow-hidden">
+<div class="bg-[#81C784] h-full rounded-full" style="width: 60%;"></div>
+</div>
+</div>
+<div class="bg-surface-container rounded-lg p-3 flex flex-col">
+<span class="font-label text-xs text-on-surface-variant mb-1 flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-[#FFD54F]"></span> Fat
+                        </span>
+<span class="font-body font-semibold text-lg text-on-surface">28<span class="text-xs font-normal ml-1">g</span></span>
+<div class="w-full bg-surface h-1.5 rounded-full mt-2 overflow-hidden">
+<div class="bg-[#FFD54F] h-full rounded-full" style="width: 35%;"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Meals List Section -->
+<section class="flex flex-col gap-4 mt-4 relative">
+<h2 class="font-headline text-2xl font-bold text-on-surface flex items-center gap-2">
+                Log
+            </h2>
+<!-- Tonal layering lists, no dividers -->
+<div class="flex flex-col gap-4">
+<!-- Breakfast Card -->
+<article class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/15 flex flex-col gap-3 relative overflow-hidden group hover:bg-surface-container-low transition-colors duration-200 cursor-pointer">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-label text-xs font-semibold uppercase tracking-wider text-primary">Breakfast • 8:30 AM</span>
+<h3 class="font-headline text-lg font-medium text-on-surface mt-1">Avocado Toast with Egg</h3>
+</div>
+<span class="font-headline font-semibold text-on-surface bg-surface-container px-3 py-1 rounded-full text-sm">340 kcal</span>
+</div>
+<div class="flex gap-2">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-secondary-fixed-dim text-on-secondary-fixed text-xs font-medium">Vegetarian</span>
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container-high text-on-surface-variant text-xs font-medium">18g Protein</span>
+</div>
+</article>
+<!-- Lunch Card -->
+<article class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/15 flex flex-col gap-3 relative overflow-hidden group hover:bg-surface-container-low transition-colors duration-200 cursor-pointer">
+<div class="flex justify-between items-start">
+<div>
+<span class="font-label text-xs font-semibold uppercase tracking-wider text-primary">Lunch • 1:15 PM</span>
+<h3 class="font-headline text-lg font-medium text-on-surface mt-1">Grilled Chicken Salad</h3>
+</div>
+<span class="font-headline font-semibold text-on-surface bg-surface-container px-3 py-1 rounded-full text-sm">420 kcal</span>
+</div>
+<div class="flex gap-2">
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container-high text-on-surface-variant text-xs font-medium">High Protein</span>
+<span class="inline-flex items-center px-2 py-1 rounded-full bg-surface-container-high text-on-surface-variant text-xs font-medium">35g Protein</span>
+</div>
+</article>
+<!-- Snack Card (using slightly recessed surface to show hierarchy) -->
+<article class="bg-surface-container p-4 rounded-xl border border-outline-variant/10 flex flex-col gap-2 relative overflow-hidden group hover:bg-surface-container-high transition-colors duration-200 cursor-pointer ml-4">
+<div class="flex justify-between items-center">
+<div class="flex flex-col">
+<span class="font-label text-xs font-medium text-on-surface-variant">Snack • 4:00 PM</span>
+<span class="font-body font-medium text-on-surface">Handful of Almonds</span>
+</div>
+<span class="font-body font-semibold text-on-surface text-sm">100 kcal</span>
+</div>
+</article>
+</div>
+</section>
+</main>
+<!-- Contextual FAB (Only showing on this primary summary screen) -->
+<div class="fixed bottom-8 right-6 md:bottom-8 md:right-8 z-50">
+<button class="bg-primary text-on-primary w-16 h-16 rounded-full flex items-center justify-center shadow-[0_20px_40px_rgba(44,47,49,0.15)] hover:scale-105 active:scale-95 transition-all duration-200">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</div>
+</body></html>
