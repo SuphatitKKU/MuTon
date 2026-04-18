@@ -511,7 +511,7 @@
           <div id="meals-list" class="flex flex-col gap-3">${renderMealsList()}</div>
         </section>
       </div>
-      <div class="fixed bottom-24 right-5 z-40">
+      <div class="fixed right-5 z-40" style="bottom: calc(5.5rem + env(safe-area-inset-bottom, 16px));">
         <button id="fab-add" class="fab bg-primary text-on-primary w-14 h-14 rounded-2xl flex items-center justify-center shadow-[0_8px_24px_rgba(0,105,71,0.3)]">
           <span class="material-symbols-outlined text-2xl">add</span>
         </button>
@@ -590,7 +590,7 @@
     state.mealName = '';
 
     container.innerHTML = `
-      <div class="page-slide-up flex flex-col min-h-[calc(50dvh-0px)] -mx-4 px-4" style="padding-top: env(safe-area-inset-top, 12px);">
+      <div class="page-slide-up flex flex-col min-h-[min(100dvh,800px)] -mx-4 -mt-28 -mb-24 px-4 bg-surface" style="padding-top: env(safe-area-inset-top, 12px); padding-bottom: calc(env(safe-area-inset-bottom, 24px) + 24px);">
         <div class="flex justify-between items-center py-3 mb-2">
           <button id="btn-close-add" class="p-2 -ml-2 rounded-full hover:bg-surface-container transition-colors text-primary">
             <span class="material-symbols-outlined text-2xl">close</span>
@@ -607,12 +607,12 @@
           <input id="meal-name-input" type="text" class="w-full bg-surface-container text-on-surface placeholder:text-on-surface-variant/50 rounded-2xl border-none focus:ring-0 focus:bg-surface-container-high transition-colors py-3.5 px-5 font-body text-base settings-input" placeholder="เช่น ข้าวผัด, ส้มตำ, กาแฟ" autocomplete="off">
         </div>
         <div class="flex flex-col items-center gap-1 mb-4">
-          <span class="font-label text-sm text-on-surface-variant font-medium">แคลอรี่</span>
-          <div class="flex items-baseline justify-center gap-1.5">
-            <span id="cal-display" class="font-headline text-6xl font-bold text-primary tracking-tighter cal-number">0</span>
-            <span class="font-body text-lg text-on-surface-variant font-medium">แคล</span>
+          <span class="font-label text-sm text-on-surface-variant font-medium mb-1">แคลอรี่</span>
+          <div class="flex items-end justify-center gap-2">
+            <span id="cal-display" class="font-headline text-6xl leading-none font-bold text-primary tracking-tighter cal-number">0</span>
+            <span class="font-body text-lg leading-none text-on-surface-variant font-medium mb-1.5">แคล</span>
           </div>
-          <div class="w-20 h-1 bg-surface-container-high rounded-full mt-1"></div>
+          <div class="w-24 h-1 bg-surface-container-high rounded-full mt-3"></div>
         </div>
         <div class="flex-grow"></div>
         <div class="grid grid-cols-3 gap-2.5 mb-4 px-1">
