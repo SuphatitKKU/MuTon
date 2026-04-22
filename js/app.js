@@ -558,7 +558,7 @@
                 <circle cx="110" cy="110" r="100" fill="none" stroke="${progressColor}" stroke-width="14"
                   stroke-dasharray="${circumference}" stroke-dashoffset="${dashoffset}" class="circle-progress-fill"></circle>
               </svg>
-              <div class="flex items-center gap-2 flex-shrink-0">
+              <div class="text-center z-10 flex flex-col items-center">
                 <span class="font-headline text-4xl font-bold tracking-tighter ${isOver ? 'text-error' : 'text-on-surface'}">${formatNumber(isOver ? netCalories - goal : remaining)}</span>
                 <span class="font-label text-xs text-on-surface-variant font-medium mt-0.5">${isOver ? 'เกินเป้า!' : 'แคลที่เหลือ'}</span>
               </div>
