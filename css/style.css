@@ -151,6 +151,19 @@ input, select, textarea {
   }
 }
 
+.meal-card.exercise {
+  border-left: 4px solid #f8a010;
+}
+
+.meal-card.exercise .material-symbols-outlined {
+  color: #f8a010;
+}
+
+.meal-card.exercise .calories-badge {
+  background-color: rgba(248, 160, 16, 0.1);
+  color: #815100;
+}
+
 /* --- Calendar --- */
 .cal-cell {
   aspect-ratio: 1;
@@ -267,6 +280,33 @@ input, select, textarea {
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
+}
+
+/* --- Challenge Mode --- */
+.challenge-active {
+  background: linear-gradient(135deg, #fff0e3 0%, #ffffff 100%);
+  border: 1px solid #f8a010 !important;
+  box-shadow: 0 8px 32px rgba(248, 160, 16, 0.15) !important;
+}
+
+.challenge-badge {
+  background: #f8a010;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.challenge-text-glow {
+  color: #815100;
+  text-shadow: 0 0 10px rgba(248, 160, 16, 0.3);
+}
+
+/* --- UI Utilities --- */
+.pb-safe-fab {
+  padding-bottom: 100px;
 }
 
 /* --- Overlay Backdrop --- */

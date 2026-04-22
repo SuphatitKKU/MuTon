@@ -41,7 +41,11 @@
     isLoading: true,
     selectedDay: null,
     firebaseReady: false,
-    unsubscribeToday: null
+    unsubscribeToday: null,
+    isExerciseMode: false,
+    challengeActive: false,
+    todayConsumed: 0,
+    todayBurned: 0
   };
 
   // ======================
@@ -209,28 +213,70 @@
   }
 
   function loadTodayMeals() {
-    const dayData = LocalDB.getDay(getToday());
-    if (dayData) { state.todayMeals = dayData.meals || []; state.todayTotal = dayData.totalCalories || 0; }
-    else { state.todayMeals = []; state.todayTotal = 0; }
+    const today = getToday();
+    const dayData = LocalDB.getDay(today);
+    if (dayData) {
+      state.todayMeals = dayData.meals || [];
+      state.todayTotal = dayData.totalCalories || 0;
+      state.todayConsumed = dayData.consumed || 0;
+      state.todayBurned = dayData.burned || 0;
+      state.challengeActive = dayData.challengeActive || false;
+    } else {
+      state.todayMeals = [];
+      state.todayTotal = 0;
+      state.todayConsumed = 0;
+      state.todayBurned = 0;
+      state.challengeActive = false;
+    }
   }
 
-  function addMeal(name, calories) {
+  function addLog(name, calories, type = 'meal') {
     const today = getToday();
-    const mealType = getMealType();
     const time = getCurrentTime();
-    const dayData = LocalDB.getDay(today) || { date: today, meals: [], totalCalories: 0 };
+    const dayData = LocalDB.getDay(today) || { 
+      date: today, 
+      meals: [], 
+      totalCalories: 0, 
+      consumed: 0, 
+      burned: 0,
+      challengeActive: state.challengeActive 
+    };
 
-    dayData.meals.push({ id: Date.now().toString(), name, calories, time, type: mealType.label, icon: mealType.icon });
-    dayData.totalCalories = dayData.meals.reduce((s, m) => s + m.calories, 0);
-    dayData.goal = state.profile ? state.profile.dailyGoal : 2000;
+    const mealType = type === 'meal' ? getMealType() : { label: 'ออกกำลังกาย', icon: 'fitness_center' };
+    
+    dayData.meals.push({ 
+      id: Date.now().toString(), 
+      name, 
+      calories, 
+      time, 
+      type: mealType.label, 
+      icon: mealType.icon,
+      logType: type // 'meal' or 'exercise'
+    });
+
+    const consumed = dayData.meals.filter(m => m.logType !== 'exercise').reduce((s, m) => s + m.calories, 0);
+    const burned = dayData.meals.filter(m => m.logType === 'exercise').reduce((s, m) => s + m.calories, 0);
+    
+    dayData.consumed = consumed;
+    dayData.burned = burned;
+    dayData.totalCalories = consumed - burned;
+    
+    const baseGoal = state.profile ? state.profile.dailyGoal : 2000;
+    dayData.challengeActive = state.challengeActive;
+    dayData.goal = dayData.challengeActive ? baseGoal - 250 : baseGoal;
     dayData.isSuccess = dayData.totalCalories <= dayData.goal;
 
     LocalDB.setDay(today, dayData);
     state.todayMeals = dayData.meals;
     state.todayTotal = dayData.totalCalories;
+    state.todayConsumed = dayData.consumed;
+    state.todayBurned = dayData.burned;
     syncDayToFirebase(today, dayData);
     showToast('บันทึกสำเร็จ! 🎉');
   }
+
+  // Helper for backward compatibility
+  function addMeal(name, calories) { addLog(name, calories, 'meal'); }
 
   function deleteMeal(mealId) {
     const today = getToday();
@@ -238,13 +284,23 @@
     if (!dayData) return;
 
     dayData.meals = dayData.meals.filter(m => m.id !== mealId);
-    dayData.totalCalories = dayData.meals.reduce((s, m) => s + m.calories, 0);
-    dayData.goal = state.profile ? state.profile.dailyGoal : 2000;
+    
+    const consumed = dayData.meals.filter(m => m.logType !== 'exercise').reduce((s, m) => s + m.calories, 0);
+    const burned = dayData.meals.filter(m => m.logType === 'exercise').reduce((s, m) => s + m.calories, 0);
+    
+    dayData.consumed = consumed;
+    dayData.burned = burned;
+    dayData.totalCalories = consumed - burned;
+    
+    const baseGoal = state.profile ? state.profile.dailyGoal : 2000;
+    dayData.goal = dayData.challengeActive ? baseGoal - 250 : baseGoal;
     dayData.isSuccess = dayData.totalCalories <= dayData.goal;
 
     LocalDB.setDay(today, dayData);
     state.todayMeals = dayData.meals;
     state.todayTotal = dayData.totalCalories;
+    state.todayConsumed = dayData.consumed;
+    state.todayBurned = dayData.burned;
     syncDayToFirebase(today, dayData);
     showToast('ลบเรียบร้อย');
   }
@@ -440,13 +496,17 @@
     loadTodayMeals();
     calculateStreak();
 
-    const goal = state.profile ? state.profile.dailyGoal : 2000;
-    const consumed = state.todayTotal;
-    const remaining = Math.max(0, goal - consumed);
-    const percentage = Math.min(1, consumed / goal);
+    const baseGoal = state.profile ? state.profile.dailyGoal : 2000;
+    const goal = state.challengeActive ? baseGoal - 250 : baseGoal;
+    const netCalories = state.todayTotal;
+    const consumed = state.todayConsumed;
+    const burned = state.todayBurned;
+    
+    const remaining = Math.max(0, goal - netCalories);
+    const percentage = Math.min(1, Math.max(0, netCalories) / goal);
     const circumference = 2 * Math.PI * 100;
     const dashoffset = circumference * (1 - percentage);
-    const isOver = consumed > goal;
+    const isOver = netCalories > goal;
     const progressColor = isOver ? '#e57373' : '#006947';
     const progressTrackColor = isOver ? '#ffcdd2' : '#69f6b8';
 
@@ -455,7 +515,7 @@
     const userPhoto = state.user?.photoURL || '';
 
     container.innerHTML = `
-      <div class="page-enter flex flex-col gap-6 pt-2">
+      <div class="page-enter flex flex-col gap-6 pt-2 pb-safe-fab">
         <!-- Greeting & Streak -->
         <section class="flex justify-between items-end">
           <div>
@@ -469,6 +529,25 @@
           </div>` : ''}
         </section>
 
+        <!-- Challenge Mode Card -->
+        <section class="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/10 flex items-center justify-between shadow-sm ${state.challengeActive ? 'challenge-active' : ''}">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full ${state.challengeActive ? 'bg-tertiary/20 text-tertiary' : 'bg-surface-container text-on-surface-variant'} flex items-center justify-center">
+              <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' ${state.challengeActive ? '1' : '0'};">bolt</span>
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <h3 class="font-headline text-sm font-bold ${state.challengeActive ? 'text-tertiary' : 'text-on-surface'}">Challenge Mode</h3>
+                ${state.challengeActive ? '<span class="challenge-badge">Active</span>' : ''}
+              </div>
+              <p class="font-body text-[11px] text-on-surface-variant">ลดเป้าแคลอรี่ลง 250 เพื่อเบิร์นไขมันไวขึ้น</p>
+            </div>
+          </div>
+          <button id="toggle-challenge" class="w-12 h-6 rounded-full relative transition-colors ${state.challengeActive ? 'bg-tertiary' : 'bg-surface-container-highest'}">
+            <div class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${state.challengeActive ? 'translate-x-6' : ''}"></div>
+          </button>
+        </section>
+
         <!-- Progress Hero Card -->
         <section class="bg-surface-container-lowest rounded-3xl p-6 relative overflow-hidden shadow-[0_20px_40px_rgba(44,47,49,0.06)] border border-outline-variant/10">
           <div class="absolute -top-16 -left-16 w-56 h-56 bg-primary-container/25 rounded-full blur-3xl pointer-events-none"></div>
@@ -479,25 +558,29 @@
                 <circle cx="110" cy="110" r="100" fill="none" stroke="${progressColor}" stroke-width="14"
                   stroke-dasharray="${circumference}" stroke-dashoffset="${dashoffset}" class="circle-progress-fill"></circle>
               </svg>
-              <div class="text-center z-10 flex flex-col items-center">
-                <span class="font-headline text-4xl font-bold tracking-tighter ${isOver ? 'text-error' : 'text-on-surface'}">${formatNumber(isOver ? consumed - goal : remaining)}</span>
+              <div class="flex items-center gap-2 flex-shrink-0">
+                <span class="font-headline text-4xl font-bold tracking-tighter ${isOver ? 'text-error' : 'text-on-surface'}">${formatNumber(isOver ? netCalories - goal : remaining)}</span>
                 <span class="font-label text-xs text-on-surface-variant font-medium mt-0.5">${isOver ? 'เกินเป้า!' : 'แคลที่เหลือ'}</span>
               </div>
             </div>
-            <div class="flex justify-between items-baseline w-full px-2">
+            <div class="grid grid-cols-3 w-full px-2 gap-4">
               <div class="flex flex-col">
-                <span class="font-label text-xs text-on-surface-variant">กินไปแล้ว</span>
-                <span class="font-headline text-xl font-semibold ${isOver ? 'text-error' : 'text-primary'}">${formatNumber(consumed)} <span class="text-xs font-normal text-on-surface-variant">แคล</span></span>
+                <span class="font-label text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">กินไปแล้ว</span>
+                <span class="font-headline text-lg font-semibold text-primary">${formatNumber(consumed)} <span class="text-[10px] font-normal text-on-surface-variant">แคล</span></span>
+              </div>
+              <div class="flex flex-col items-center border-x border-outline-variant/20">
+                <span class="font-label text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">เบิร์นออก</span>
+                <span class="font-headline text-lg font-semibold text-tertiary">${formatNumber(burned)} <span class="text-[10px] font-normal text-on-surface-variant">แคล</span></span>
               </div>
               <div class="text-right flex flex-col">
-                <span class="font-label text-xs text-on-surface-variant">เป้าหมาย</span>
-                <span class="font-headline text-lg font-medium text-on-surface">${formatNumber(goal)} <span class="text-xs font-normal text-on-surface-variant">แคล</span></span>
+                <span class="font-label text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">เป้าหมาย</span>
+                <span class="font-headline text-lg font-medium text-on-surface">${formatNumber(goal)} <span class="text-[10px] font-normal text-on-surface-variant">แคล</span></span>
               </div>
             </div>
             ${isOver ? `
             <div class="w-full bg-error-container/20 rounded-xl px-4 py-2.5 flex items-center gap-2">
               <span class="material-symbols-outlined text-error text-lg">warning</span>
-              <span class="font-body text-sm text-error font-medium">เกินเป้าไป ${formatNumber(consumed - goal)} แคล</span>
+              <span class="font-body text-sm text-error font-medium">เกินเป้าไป ${formatNumber(netCalories - goal)} แคล</span>
             </div>` : ''}
           </div>
         </section>
@@ -506,9 +589,9 @@
         <section class="flex flex-col gap-3">
           <h2 class="font-headline text-xl font-bold text-on-surface flex items-center gap-2">
             <span class="material-symbols-outlined text-primary text-xl">receipt_long</span>
-            บันทึกมื้ออาหาร
+            บันทึกประจำวัน
           </h2>
-          <div id="meals-list" class="flex flex-col gap-3">${renderMealsList()}</div>
+          <div id="meals-list" class="flex flex-col gap-3 pb-4">${renderMealsList()}</div>
         </section>
       </div>
       <div class="fixed right-5 z-40" style="bottom: calc(5.5rem + env(safe-area-inset-bottom, 16px));">
@@ -519,6 +602,19 @@
     `;
 
     document.getElementById('fab-add').addEventListener('click', () => navigate('add-meal'));
+    document.getElementById('toggle-challenge').addEventListener('click', () => {
+      state.challengeActive = !state.challengeActive;
+      const today = getToday();
+      const dayData = LocalDB.getDay(today) || { date: today, meals: [], totalCalories: 0, challengeActive: state.challengeActive };
+      dayData.challengeActive = state.challengeActive;
+      const baseGoal = state.profile ? state.profile.dailyGoal : 2000;
+      dayData.goal = state.challengeActive ? baseGoal - 250 : baseGoal;
+      dayData.isSuccess = dayData.totalCalories <= dayData.goal;
+      LocalDB.setDay(today, dayData);
+      syncDayToFirebase(today, dayData);
+      renderHome(container);
+      showToast(state.challengeActive ? 'เปิดโหมดท้าทายแล้ว! 🔥' : 'ปิดโหมดท้าทาย');
+    });
     bindMealDeleteButtons();
 
     // Update top bar avatar
@@ -535,16 +631,16 @@
         </div>`;
     }
     return state.todayMeals.map(meal => `
-      <article class="meal-card bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 flex items-center gap-3" data-meal-id="${meal.id}">
-        <div class="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center flex-shrink-0">
-          <span class="material-symbols-outlined text-primary text-lg">${meal.icon || 'restaurant'}</span>
+      <article class="meal-card ${meal.logType === 'exercise' ? 'exercise' : ''} bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 flex items-center gap-3" data-meal-id="${meal.id}">
+        <div class="w-10 h-10 rounded-xl ${meal.logType === 'exercise' ? 'bg-tertiary/10' : 'bg-surface-container'} flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined ${meal.logType === 'exercise' ? 'text-tertiary' : 'text-primary'} text-lg">${meal.icon || 'restaurant'}</span>
         </div>
         <div class="flex-grow min-w-0">
-          <span class="font-label text-[10px] font-semibold uppercase tracking-wider text-primary">${meal.type} • ${meal.time}</span>
+          <span class="font-label text-[10px] font-semibold uppercase tracking-wider ${meal.logType === 'exercise' ? 'text-tertiary' : 'text-primary'}">${meal.type} • ${meal.time}</span>
           <h3 class="font-body font-medium text-on-surface text-sm truncate mt-0.5">${meal.name}</h3>
         </div>
         <div class="flex items-center gap-2 flex-shrink-0">
-          <span class="font-headline font-semibold text-on-surface bg-surface-container px-3 py-1 rounded-full text-xs">${formatNumber(meal.calories)} แคล</span>
+          <span class="font-headline font-semibold ${meal.logType === 'exercise' ? 'text-tertiary' : 'text-on-surface'} bg-surface-container px-3 py-1 rounded-full text-xs">${meal.logType === 'exercise' ? '-' : ''}${formatNumber(meal.calories)} แคล</span>
           <button class="btn-delete-meal p-1.5 rounded-full hover:bg-error-container/20 transition-colors text-on-surface-variant hover:text-error" data-meal-id="${meal.id}">
             <span class="material-symbols-outlined text-base">close</span>
           </button>
@@ -590,26 +686,37 @@
     state.mealName = '';
 
     container.innerHTML = `
-      <div class="page-slide-up flex flex-col min-h-[min(100dvh,800px)] -mx-4 -mt-28 -mb-24 px-4 bg-surface" style="padding-top: env(safe-area-inset-top, 12px); padding-bottom: calc(env(safe-area-inset-bottom, 24px) + 24px);">
+      <div class="page-slide-up flex flex-col min-h-[min(100dvh,800px)] -mx-4 -mt-28 -mb-24 px-4 ${state.isExerciseMode ? 'bg-on-tertiary' : 'bg-surface'}" style="padding-top: env(safe-area-inset-top, 12px); padding-bottom: calc(env(safe-area-inset-bottom, 24px) + 24px);">
         <div class="flex justify-between items-center py-3 mb-2">
-          <button id="btn-close-add" class="p-2 -ml-2 rounded-full hover:bg-surface-container transition-colors text-primary">
+          <button id="btn-close-add" class="p-2 -ml-2 rounded-full hover:bg-surface-container transition-colors ${state.isExerciseMode ? 'text-tertiary' : 'text-primary'}">
             <span class="material-symbols-outlined text-2xl">close</span>
           </button>
-          <span class="font-headline font-black text-primary text-xl">MuTon</span>
+          <span class="font-headline font-black ${state.isExerciseMode ? 'text-tertiary' : 'text-primary'} text-xl">MuTon</span>
           <div class="w-10"></div>
         </div>
+        
+        <!-- Toggle Tabs -->
+        <div class="flex bg-surface-container-low p-1 rounded-2xl mb-6 mx-4">
+          <button id="tab-meal" class="flex-1 py-2.5 rounded-xl font-headline text-sm font-bold transition-all ${!state.isExerciseMode ? 'bg-white text-primary shadow-sm' : 'text-on-surface-variant'}">
+            อาหาร
+          </button>
+          <button id="tab-exercise" class="flex-1 py-2.5 rounded-xl font-headline text-sm font-bold transition-all ${state.isExerciseMode ? 'bg-white text-tertiary shadow-sm' : 'text-on-surface-variant'}">
+            ออกกำลังกาย
+          </button>
+        </div>
+
         <div class="text-center mb-6">
-          <h1 class="font-headline text-2xl font-bold text-on-surface tracking-tight">เพิ่มมื้ออาหาร</h1>
-          <p class="text-on-surface-variant text-sm font-body mt-1">วันนี้กินอะไร?</p>
+          <h1 class="font-headline text-2xl font-bold text-on-surface tracking-tight">${state.isExerciseMode ? 'บันทึกการเบิร์น' : 'เพิ่มมื้ออาหาร'}</h1>
+          <p class="text-on-surface-variant text-sm font-body mt-1">${state.isExerciseMode ? 'วันนี้ออกกำลังกายอะไรไปบ้าง?' : 'วันนี้กินอะไร?'}</p>
         </div>
         <div class="flex flex-col gap-1.5 mb-6">
-          <label class="font-label text-sm font-semibold text-on-surface ml-1" for="meal-name-input">ชื่อเมนู</label>
-          <input id="meal-name-input" type="text" class="w-full bg-surface-container text-on-surface placeholder:text-on-surface-variant/50 rounded-2xl border-none focus:ring-0 focus:bg-surface-container-high transition-colors py-3.5 px-5 font-body text-base settings-input" placeholder="เช่น ข้าวผัด, ส้มตำ, กาแฟ" autocomplete="off">
+          <label class="font-label text-sm font-semibold text-on-surface ml-1" for="meal-name-input">${state.isExerciseMode ? 'กิจกรรม' : 'ชื่อเมนู'}</label>
+          <input id="meal-name-input" type="text" class="w-full bg-surface-container text-on-surface placeholder:text-on-surface-variant/50 rounded-2xl border-none focus:ring-0 focus:bg-surface-container-high transition-colors py-3.5 px-5 font-body text-base settings-input" placeholder="${state.isExerciseMode ? 'เช่น วิ่ง, ปั่นจักรยาน, เดิน' : 'เช่น ข้าวผัด, ส้มตำ, กาแฟ'}" autocomplete="off">
         </div>
         <div class="flex flex-col items-center gap-1 mb-4">
-          <span class="font-label text-sm text-on-surface-variant font-medium mb-1">แคลอรี่</span>
+          <span class="font-label text-sm text-on-surface-variant font-medium mb-1">${state.isExerciseMode ? 'แคลอรี่ที่เผาผลาญ' : 'แคลอรี่'}</span>
           <div class="flex items-end justify-center gap-2">
-            <span id="cal-display" class="font-headline text-6xl leading-none font-bold text-primary tracking-tighter cal-number">0</span>
+            <span id="cal-display" class="font-headline text-6xl leading-none font-bold ${state.isExerciseMode ? 'text-tertiary' : 'text-primary'} tracking-tighter cal-number">0</span>
             <span class="font-body text-lg leading-none text-on-surface-variant font-medium mb-1.5">แคล</span>
           </div>
           <div class="w-24 h-1 bg-surface-container-high rounded-full mt-3"></div>
@@ -623,7 +730,7 @@
             <span class="material-symbols-outlined text-xl">backspace</span>
           </button>
         </div>
-        <button id="btn-add-diary" class="w-full bg-primary text-on-primary font-headline font-semibold text-base py-4 rounded-full hover:opacity-90 active:scale-[0.98] transition-all shadow-[0_12px_32px_rgba(0,105,71,0.2)] flex justify-center items-center gap-2 mb-6">
+        <button id="btn-add-diary" class="w-full ${state.isExerciseMode ? 'bg-tertiary text-on-tertiary-fixed' : 'bg-primary text-on-primary'} font-headline font-semibold text-base py-4 rounded-full hover:opacity-90 active:scale-[0.98] transition-all shadow-lg flex justify-center items-center gap-2 mb-6">
           <span class="material-symbols-outlined text-lg">check_circle</span> บันทึก
         </button>
       </div>
@@ -645,12 +752,16 @@
       document.getElementById('cal-display').textContent = formatNumber(parseInt(state.calValue) || 0);
     });
 
+    document.getElementById('tab-meal').addEventListener('click', () => { state.isExerciseMode = false; renderAddMeal(container); });
+    document.getElementById('tab-exercise').addEventListener('click', () => { state.isExerciseMode = true; renderAddMeal(container); });
+
     document.getElementById('btn-add-diary').addEventListener('click', () => {
       const name = state.mealName.trim();
       const cal = parseInt(state.calValue) || 0;
-      if (!name) { showToast('กรุณาใส่ชื่อเมนู'); document.getElementById('meal-name-input').focus(); return; }
+      if (!name) { showToast(state.isExerciseMode ? 'กรุณาใส่ชื่อกิจกรรม' : 'กรุณาใส่ชื่อเมนู'); document.getElementById('meal-name-input').focus(); return; }
       if (cal <= 0) { showToast('กรุณาใส่จำนวนแคลอรี่'); return; }
-      addMeal(name, cal);
+      addLog(name, cal, state.isExerciseMode ? 'exercise' : 'meal');
+      state.isExerciseMode = false; // Reset for next time
       navigate('home');
     });
   }
@@ -717,17 +828,49 @@
       return;
     }
     
+    // Calculate average deficit from actual data (last 7 days)
+    const allDays = LocalDB.getAllDays();
+    const today = new Date();
+    let totalDeficit = 0;
+    let daysWithData = 0;
+    
     const bmr = calculateBMR(p.weight, p.height, p.age, p.gender);
     const tdee = calculateTDEE(bmr, p.activityLevel);
-    const dailyDeficit = tdee - p.dailyGoal;
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today); d.setDate(d.getDate() - i);
+      const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const dd = allDays[ds];
+      if (dd && dd.totalCalories !== undefined) {
+        // Deficit = TDEE - NetCalories
+        totalDeficit += (tdee - dd.totalCalories);
+        daysWithData++;
+      }
+    }
+
+    // Fallback to theoretical goal if no data
+    const actualDailyDeficit = daysWithData > 0 ? (totalDeficit / daysWithData) : (tdee - p.dailyGoal);
     
-    if (dailyDeficit <= 0) {
-      container.innerHTML = '';
+    if (actualDailyDeficit <= 0) {
+      container.innerHTML = `
+        <section class="bg-error-container/20 rounded-3xl p-5 border border-error/20 mt-1 flex items-start gap-4">
+          <div class="w-12 h-12 rounded-full bg-error/10 flex items-center justify-center flex-shrink-0 text-error">
+            <span class="material-symbols-outlined text-2xl">warning</span>
+          </div>
+          <div>
+            <h3 class="font-headline text-sm font-bold text-error">คำเตือน</h3>
+            <p class="font-body text-xs text-on-surface mt-0.5 leading-relaxed">
+              ค่าเฉลี่ยการกินของคุณปัจจุบัน ${formatNumber(Math.round(tdee - actualDailyDeficit))} แคล ยังไม่ทำให้เกิดการลดน้ำหนัก (TDEE: ${formatNumber(tdee)})
+            </p>
+            <p class="font-body text-[11px] text-error mt-1 opacity-80">ลองออกกำลังกายเพิ่มหรือลดแคลอรี่ดูนะครับ!</p>
+          </div>
+        </section>
+      `;
       return;
     }
     
     const totalDeficitNeeded = (p.weight - p.targetWeight) * 7700;
-    const daysNeeded = Math.ceil(totalDeficitNeeded / dailyDeficit);
+    const daysNeeded = Math.ceil(totalDeficitNeeded / actualDailyDeficit);
     
     const targetDate = new Date();
     targetDate.setDate(targetDate.getDate() + daysNeeded);
@@ -743,7 +886,7 @@
           <h3 class="font-headline text-sm font-bold text-primary">คาดว่าจะสำเร็จในวันที่</h3>
           <p class="font-headline text-xl font-bold text-on-surface mt-0.5">${targetDateStr}</p>
           <p class="font-body text-[11px] text-on-surface-variant mt-1.5 leading-relaxed opacity-80">
-            *คำนวณจากการเผาผลาญ ${formatNumber(tdee)} แคล/วัน และกินตามเป้า ${formatNumber(p.dailyGoal)} แคล/วัน
+            *คำนวณจากพฤติกรรมจริง 7 วันล่าสุดของคุณ (Deficit เฉลี่ย: ${formatNumber(Math.round(actualDailyDeficit))} แคล/วัน)
           </p>
         </div>
       </section>
